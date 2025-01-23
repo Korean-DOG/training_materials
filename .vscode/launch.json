@@ -48,5 +48,27 @@
                 "TestBugsSort"
             ]
         },
+        {
+            "name": "sync test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestGetInstance"
+            ]
+        },
+        {
+            "name": "async test",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestSecondGetInstance"
+            ]
+        },
     ]
 }

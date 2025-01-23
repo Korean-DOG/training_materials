@@ -42,7 +42,7 @@ func Reset(r Resetter) {
 }
 
 func ResetWithPenalityToPlayer(r Resetter) {
-	if player, ok := r.(Player); ok {
+	if player, ok := r.(*Player); ok {
 		player.health = 50
 	} else {
 		r.Reset()
@@ -51,14 +51,16 @@ func ResetWithPenalityToPlayer(r Resetter) {
 
 func TestInheritance(t *testing.T) {
 
-	var p1 = Player{50, Coordinate{1, 1}}
+	var p1 = Player{30, Coordinate{1, 1}}
 	fmt.Println(p1)
-	Reset(&p1) // same as p1.Reset
+	ResetWithPenalityToPlayer(&p1) // same as p1.Reset
+	//Reset(&p1) // same as p1.Reset
 	fmt.Println(p1)
 
 	var m1 = Monster{20, Coordinate{5, 5}, true}
 	fmt.Println(m1)
-	Reset(&m1) // same as m1.Reset
+	ResetWithPenalityToPlayer(&m1) // same as m1.Reset
+	//Reset(&m1) // same as m1.Reset
 	fmt.Println(m1)
 
 	//fmt.Println(array, a, b)
