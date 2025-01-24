@@ -70,5 +70,16 @@
                 "TestSecondGetInstance"
             ]
         },
+        {
+            "name": "io",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestIO"
+            ]
+        },
     ]
 }
