@@ -81,5 +81,16 @@
                 "TestIO"
             ]
         },
+        {
+            "name": "inherit2",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestInheritance2"
+            ]
+        },
     ]
 }
