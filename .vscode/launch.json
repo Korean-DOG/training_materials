@@ -103,5 +103,16 @@
                 "TestRoutine"
             ]
         },
+        {
+            "name": "rev_string",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/simple_tasks",
+            "args": [
+                "-test.run",
+                "TestRevertString"
+            ]
+        },
     ]
 }
