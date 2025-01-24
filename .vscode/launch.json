@@ -92,5 +92,16 @@
                 "TestInheritance2"
             ]
         },
+        {
+            "name": "routing",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}",
+            "args": [
+                "-test.run",
+                "TestRoutine"
+            ]
+        },
     ]
 }
