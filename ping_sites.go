@@ -47,32 +47,29 @@ func real_ping(addr string) {
 	//fmt.Println("Site reached: '", addr, "' in", r, "ms")
 }
 
-func ping(limit int) func(context.Context, string) bool {
+func ping(limit int) func(context.Context, string) (Counters, bool) {
 	var c Counters
 	c.counter = make(map[string]int)
 	c.setLimit(limit)
 
-	return func(ctx context.Context, addr string) bool {
-		if addr == "" {
-			fmt.Println(c.counter)
-		}
+	return func(ctx context.Context, addr string) (Counters, bool) {
 		select {
 		case <-ctx.Done():
-			return false
+			return c, false
 		default:
 			ok := c.increase(addr)
 			if ok {
 				real_ping(addr)
-				return true
+				return c, true
 			} else if len(c.notFinished()) == 0 {
-				return false
+				return c, false
 			}
-			return ok
+			return c, ok
 		}
 	}
 }
 
-func worker(ctx context.Context, sites []string, ping_func func(context.Context, string) bool, cancel func()) {
+func worker(ctx context.Context, sites []string, ping_func func(context.Context, string) (Counters, bool), cancel func()) {
 	var sites_to_ping []string
 
 	for i := 0; i < len(sites); i++ {
@@ -85,7 +82,7 @@ func worker(ctx context.Context, sites []string, ping_func func(context.Context,
 			return
 		}
 		for pos, site := range sites_to_ping {
-			can_continue := ping_func(ctx, site)
+			_, can_continue := ping_func(ctx, site)
 			if !can_continue {
 				if (len(sites_to_ping) - 1) > pos+1 {
 					sites_to_ping = append(sites_to_ping[:pos], sites_to_ping[pos+1:]...)
@@ -97,14 +94,21 @@ func worker(ctx context.Context, sites []string, ping_func func(context.Context,
 	}
 }
 
-func ping_3_sites(ctx context.Context, sites []string, num_of_calls, limit_of_parallel int, cancel func()) {
+func ping_3_sites(ctx context.Context, sites []string, num_of_calls, limit_of_parallel int, cancel func()) (reason error, pinged map[string]int) {
+
+	//reason = error("unknown")
+
 	ping_func := ping(num_of_calls)
 
 	for i := 0; i < limit_of_parallel; i++ {
 		go worker(ctx, sites, ping_func, cancel)
 	}
 
-	defer func() { ping_func(ctx, "") }()
+	// "return reason and counter"
+	defer func() {
+		pinged_counters, _ := ping_func(ctx, "")
+		pinged = pinged_counters.counter
+	}()
 
 	started := time.Now()
 	fmt.Println("started", started.Second())
@@ -116,9 +120,9 @@ func ping_3_sites(ctx context.Context, sites []string, num_of_calls, limit_of_pa
 		case <-ctx.Done():
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
-				fmt.Println("Завершение по таймауту")
+				reason = context.DeadlineExceeded
 			case context.Canceled:
-				fmt.Println("Завершение по отмене контекста")
+				reason = context.Canceled
 			}
 			done := time.Now()
 			fmt.Println("break", done.Second())
@@ -129,4 +133,5 @@ func ping_3_sites(ctx context.Context, sites []string, num_of_calls, limit_of_pa
 		}
 	}
 	fmt.Println("end", time.Now().Second())
+	return
 }
